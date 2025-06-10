@@ -22,4 +22,4 @@ Certification** and Altitude info
 Data Cleaning & Wrangling:
 using Python/Pandas + SQL
 
-Dashboard Visualization (Streamlit OR Tableau/Power BI
+Dashboard Visualization (Streamlit OR Tableau/Power BI)
