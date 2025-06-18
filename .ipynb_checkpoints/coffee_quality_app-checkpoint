@@ -1,0 +1,126 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "id": "3df58b2b-dc32-4bed-a7d1-af0efed3c330",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import streamlit as st\n",
+    "import pandas as pd\n",
+    "import seaborn as sns\n",
+    "import matplotlib.pyplot as plt"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "id": "f7238308-c040-4df5-a7a6-49974db8e423",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "2025-06-10 14:33:16.090 No runtime found, using MemoryCacheStorageManager\n",
+      "C:\\Users\\sarah\\AppData\\Local\\Temp\\ipykernel_3668\\2998257140.py:33: FutureWarning: \n",
+      "\n",
+      "Passing `palette` without assigning `hue` is deprecated and will be removed in v0.14.0. Assign the `y` variable to `hue` and set `legend=False` for the same effect.\n",
+      "\n",
+      "  sns.barplot(x=top_regions.values, y=top_regions.index, ax=ax, palette=\"viridis\")\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "DeltaGenerator()"
+      ]
+     },
+     "execution_count": 12,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "#Load data\n",
+    "@st.cache_data\n",
+    "def load_data():\n",
+    "    df = pd.read_excel(r\"C:\\Users\\sarah\\OneDrive\\Documentos\\GitHub\\Final-Project\\cleaned_version.xlsx\")\n",
+    "    df['Region_Country'] = df['Region'].astype(str) + \" (\" + df['Country_of_Origin'].astype(str) + \")\"\n",
+    "    return df.dropna(subset=['Cupper_Points', 'Total_Cup_Points'])\n",
+    "\n",
+    "df = load_data()\n",
+    "\n",
+    "st.title(\"☕ Coffee Quality Dashboard\")\n",
+    "\n",
+    "# Sidebar\n",
+    "st.sidebar.header(\"Filters\")\n",
+    "country = st.sidebar.selectbox(\"Select Country\", ['All'] + sorted(df['Country_of_Origin'].unique().tolist()))\n",
+    "\n",
+    "if country != 'All':\n",
+    "    df = df[df['Country_of_Origin'] == country]\n",
+    "\n",
+    "# Show data\n",
+    "if st.checkbox(\"Show Raw Data\"):\n",
+    "    st.write(df)\n",
+    "\n",
+    "# Top Regions by Cupper Points\n",
+    "st.subheader(\"Top 10 Regions by Cupper Points\")\n",
+    "top_regions = (\n",
+    "    df.groupby('Region_Country')['Cupper_Points']\n",
+    "    .mean()\n",
+    "    .sort_values(ascending=False)\n",
+    "    .head(10)\n",
+    ")\n",
+    "\n",
+    "fig, ax = plt.subplots(figsize=(10, 6))\n",
+    "sns.barplot(x=top_regions.values, y=top_regions.index, ax=ax, palette=\"viridis\")\n",
+    "ax.set_title(\"Top 10 Regions by Cupper Points\")\n",
+    "ax.set_xlabel(\"Average Cupper Points\")\n",
+    "ax.set_ylabel(\"Region (Country)\")\n",
+    "st.pyplot(fig)\n",
+    "\n",
+    "# Correlation Heatmap\n",
+    "st.subheader(\"Correlation Heatmap of Quality Attributes\")\n",
+    "quality_cols = ['Cupper_Points', 'Total_Cup_Points', 'Aroma', 'Flavor', 'Acidity', 'Body', 'Balance']\n",
+    "corr_df = df[quality_cols].dropna()\n",
+    "correlation = corr_df.corr()\n",
+    "\n",
+    "fig2, ax2 = plt.subplots(figsize=(8, 6))\n",
+    "sns.heatmap(correlation, annot=True, cmap='coolwarm', ax=ax2)\n",
+    "ax2.set_title(\"Correlation Between Cupper Points and Quality Attributes\")\n",
+    "st.pyplot(fig2)\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "3a225873-19e2-41da-b108-fc6750bea765",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python [conda env:base] *",
+   "language": "python",
+   "name": "conda-base-py"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.12.7"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
